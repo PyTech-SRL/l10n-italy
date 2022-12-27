@@ -4,19 +4,6 @@
 from openupgradelib import openupgrade
 from psycopg2 import sql
 
-# account_invoice -> account_move migration
-i_m_columns = (
-    ("fatturapa_payment_data", "invoice_id"),
-    ("welfare_fund_data_line", "invoice_id"),
-    ("withholding_data_line", "invoice_id"),
-    ("discount_rise_price", "invoice_id"),
-    ("fatturapa_related_document_type", "invoice_id"),
-    ("fatturapa_activity_progress", "invoice_id"),
-    ("fatturapa_attachments", "invoice_id"),
-    ("fatturapa_related_ddt", "invoice_id"),
-    ("fatturapa_summary_data", "invoice_id"),
-)
-
 invoice_data = (
     ("protocol_number"),
     ("tax_representative_id"),
@@ -47,13 +34,6 @@ invoice_data = (
     ("efatt_stabile_organizzazione_nazione"),
     ("efatt_rounding"),
     ("art73"),
-)
-
-# account_invoice_line -> account_move_line migration
-il_ml_columns = (
-    ("discount_rise_price", "invoice_line_id"),
-    ("fatturapa_related_document_type", "invoice_line_id"),
-    ("fatturapa_related_ddt", "invoice_line_id"),
 )
 
 invoice_line_data = (
@@ -90,19 +70,6 @@ def migrate(env, version):
     # check if it is a migration from 13.0
     elif openupgrade.table_exists(env.cr, "account_invoice"):
         # rely on move_id, usually for not ('draft' or 'cancel')
-        for table, column in i_m_columns:
-            openupgrade.logged_query(
-                env.cr,
-                sql.SQL(
-                    """UPDATE {0} t
-                SET {1} = i.move_id
-                FROM account_invoice i
-                WHERE t.{1} = i.id and i.move_id is NOT NULL"""
-                ).format(
-                    sql.Identifier(table),
-                    sql.Identifier(column),
-                ),
-            )
         openupgrade.logged_query(
             env.cr,
             sql.SQL(
@@ -164,24 +131,6 @@ def migrate(env, version):
                     OR il.uom_id = ml.product_uom_id)
                 """
 
-        # rely on move_id, usually for not ('draft' or 'cancel')
-        for table, column in il_ml_columns:
-            openupgrade.logged_query(
-                env.cr,
-                sql.SQL(
-                    """UPDATE {0} t
-                SET {1} = ml.id
-                FROM account_move_line ml
-                JOIN account_move m ON (m.id = ml.move_id)
-                JOIN account_invoice i ON (i.move_id = m.id)
-                JOIN account_invoice_line il ON (il.invoice_id = i.id)
-                WHERE t.{1} = il.id AND {2}"""
-                ).format(
-                    sql.Identifier(table),
-                    sql.Identifier(column),
-                    sql.SQL(move_line_where),
-                ),
-            )
         openupgrade.logged_query(
             env.cr,
             sql.SQL(
