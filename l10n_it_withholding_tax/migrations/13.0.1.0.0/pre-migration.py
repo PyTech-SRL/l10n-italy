@@ -10,6 +10,23 @@ def migrate(env, installed_version):
         openupgrade.logged_query(
             env.cr,
             """
+        ALTER TABLE account_invoice_line_tax_wt
+            DROP CONSTRAINT IF EXISTS account_invoice_line_tax_wt_invoice_line_id_fkey
+        """,
+        )
+        openupgrade.logged_query(
+            cr,
+            """
+            UPDATE account_invoice_line_tax_wt ailtw
+            SET invoice_line_id = aml.id
+            FROM account_invoice_line ail
+            JOIN account_move_line aml ON aml.old_invoice_line_id = ail.id
+            WHERE ailtw.invoice_line_id = ail.id""",
+        )
+
+        openupgrade.logged_query(
+            cr,
+            """
         ALTER TABLE account_invoice
             ADD COLUMN IF NOT EXISTS amount_net_pay_residual numeric
         """,
