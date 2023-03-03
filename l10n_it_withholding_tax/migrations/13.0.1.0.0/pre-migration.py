@@ -17,6 +17,14 @@ def migrate(env, installed_version):
         openupgrade.logged_query(
             cr,
             """
+        ALTER TABLE account_invoice_line_tax_wt
+            DROP CONSTRAINT IF EXISTS
+            account_invoice_line_tax_wt_invoice_line_id_withholding_tax_key
+        """,
+        )
+        openupgrade.logged_query(
+            cr,
+            """
             UPDATE account_invoice_line_tax_wt ailtw
             SET invoice_line_id = aml.id
             FROM account_invoice_line ail
@@ -89,3 +97,47 @@ def migrate(env, installed_version):
                     env.cr,
                     query,
                 )
+
+        openupgrade.logged_query(
+            cr,
+            """
+        ALTER TABLE account_invoice_withholding_tax
+            DROP CONSTRAINT IF EXISTS
+            account_invoice_withholding_tax_invoice_id_fkey
+        """,
+        )
+
+        openupgrade.logged_query(
+            cr,
+            """
+        update account_invoice_withholding_tax
+        set
+            invoice_id = am.id
+        from account_invoice inv
+            join account_move am on am.id = inv.move_id
+        where
+            invoice_id = inv.id;
+        """,
+        )
+
+        openupgrade.logged_query(
+            cr,
+            """
+        ALTER TABLE withholding_tax_statement
+            DROP CONSTRAINT IF EXISTS
+            withholding_tax_statement_invoice_id_fkey
+        """,
+        )
+
+        openupgrade.logged_query(
+            cr,
+            """
+        update withholding_tax_statement
+        set
+            invoice_id = am.id
+        from account_invoice inv
+            join account_move am on am.id = inv.move_id
+        where
+            invoice_id = inv.id;
+        """,
+        )
