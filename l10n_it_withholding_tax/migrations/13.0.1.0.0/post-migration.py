@@ -20,16 +20,3 @@ where
     account_move.id = inv.move_id;
     """,
     )
-
-    openupgrade.logged_query(
-        cr,
-        """
-update account_invoice_withholding_tax
-set
-    invoice_id = am.id
-from account_invoice inv
-    join account_move am on am.id = inv.move_id
-where
-    invoice_id = inv.id;
-    """,
-    )
