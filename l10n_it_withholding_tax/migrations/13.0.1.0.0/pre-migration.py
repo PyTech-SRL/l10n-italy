@@ -4,11 +4,12 @@ from psycopg2 import sql
 
 @openupgrade.migrate()
 def migrate(env, installed_version):
+    cr = env.cr
     if not installed_version:
         return
-    if openupgrade.table_exists(env.cr, "account_invoice"):
+    if openupgrade.table_exists(cr, "account_invoice"):
         openupgrade.logged_query(
-            env.cr,
+            cr,
             """
         ALTER TABLE account_invoice_line_tax_wt
             DROP CONSTRAINT IF EXISTS account_invoice_line_tax_wt_invoice_line_id_fkey

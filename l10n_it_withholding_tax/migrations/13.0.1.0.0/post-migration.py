@@ -1,13 +1,14 @@
 from openupgradelib import openupgrade  # pylint: disable=W7936
 
 
-def migrate(cr, installed_version):
+@openupgrade.migrate()
+def migrate(env, installed_version):
     openupgrade.load_data(
-        cr, "l10n_it_withholding_tax", "migrations/13.0.1.0.0/noupdate_changes.xml"
+        env.cr, "l10n_it_withholding_tax", "migrations/13.0.1.0.0/noupdate_changes.xml"
     )
 
     openupgrade.logged_query(
-        cr,
+        env.cr,
         """
 update account_move
 set
