@@ -25,8 +25,7 @@
     ],
     "assets": {
         "web.assets_backend": [
-            "l10n_it_financial_statements_report/static/src/js/action_manager_report.js",
-            "l10n_it_financial_statements_report/static/src/js/client_action.js",
+            "l10n_it_financial_statements_report/static/src/js/client_action.esm.js",
         ],
     },
 }
