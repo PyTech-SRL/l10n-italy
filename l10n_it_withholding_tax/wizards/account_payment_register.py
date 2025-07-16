@@ -1,4 +1,5 @@
 #  Copyright 2023 Simone Rubino - TAKOBI
+#  Copyright 2025 Simone Rubino - PyTech
 #  License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 from odoo import _, api, models
@@ -43,7 +44,10 @@ class AccountPaymentRegister(models.TransientModel):
     def _get_total_amount_in_wizard_currency_to_full_reconcile(
         self, batch_result, early_payment_discount=True
     ):
-        amount, mode = super()._get_total_amount_in_wizard_currency_to_full_reconcile(
+        (
+            amount,
+            mode,
+        ) = super()._get_total_amount_in_wizard_currency_to_full_reconcile(
             batch_result, early_payment_discount=early_payment_discount
         )
         withholding_net_pay_residual_values = self._inject_withholding_net_pay_residual(
@@ -55,3 +59,16 @@ class AccountPaymentRegister(models.TransientModel):
         if withholding_net_pay_residual is not None:
             amount = withholding_net_pay_residual
         return amount, mode
+
+    def _create_payment_vals_from_wizard(self):
+        payment_vals = super()._create_payment_vals_from_wizard()
+        write_off_vals = payment_vals.get("write_off_line_vals")
+        if write_off_vals:
+            withholding_moves = self.line_ids.move_id.filtered("withholding_tax")
+            if withholding_moves:
+                residual_withholding_amount = sum(
+                    withholding_moves.mapped("amount_residual") or []
+                ) - sum(withholding_moves.mapped("amount_net_pay_residual") or [])
+                if residual_withholding_amount:
+                    write_off_vals["amount"] -= residual_withholding_amount
+        return payment_vals
