@@ -1,7 +1,7 @@
 **Italiano**
 
 > - Compilare la fattura con i dati necessari per l'esportazione: per
->   esempio, nella scheda "Allegati fattura elettronica"
+>   esempio, nelle schede "Allegati fattura elettronica" e "Fattura elettronica"
 > - Selezionare 1 o N fatture ed eseguire la procedura guidata "Esporta
 >   fattura elettronica"
 > - Per le fatture estere, è possibile inviarle a soli fini fiscali
@@ -12,7 +12,7 @@
 **English**
 
 > - Fill invoice data you need to export: For instance, in 'Electronic
->   Invoice Attachments' TAB
+>   Invoice Attachments' and 'Electronic Invoice' tabs
 > - Select 1 or N invoices and run 'Export Electronic Invoice' wizard
 > - For foreign invoices, it is possible to send them only for tax
 >   purposes with code XXXXXXX (7 times X) and assuring to set the
