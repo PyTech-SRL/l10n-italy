@@ -201,6 +201,10 @@ class EFatturaOut:
             wiz = self.env["wizard.export.fatturapa"]
             return wiz.getAllTaxes(record)
 
+        def get_e_invoice_lines(invoice):
+            # wrapper to a method in wizard (for better overriding)
+            return self.env["wizard.export.fatturapa"]._get_e_invoice_lines(invoice)
+
         def get_importo(line):
             str_number = str(line.discount)
             number = str_number[::-1].find(".")
@@ -257,6 +261,7 @@ class EFatturaOut:
             "all_taxes": {
                 invoice.id: get_all_taxes(invoice) for invoice in self.invoices
             },
+            "get_e_invoice_lines": get_e_invoice_lines,
             "fpa_to_eur": fpa_to_eur,
         }
 
