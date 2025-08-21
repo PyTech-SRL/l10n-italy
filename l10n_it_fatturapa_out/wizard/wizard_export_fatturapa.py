@@ -128,6 +128,20 @@ class WizardExportFatturapa(models.TransientModel):
         else:
             return abs(invoice.amount_total_signed)
 
+    def _get_e_invoice_lines(self, invoice):
+        """
+        Allow to choose how and which invoice lines will be included in the e-invoice.
+        """
+        return invoice.invoice_line_ids.sorted(
+            key=lambda line: (
+                -line.sequence,
+                line.date,
+                line.move_name,
+                -line.id,
+            ),
+            reverse=True,
+        )
+
     @api.model
     def getAllTaxes(self, invoice):
         """Generate summary data for taxes.
