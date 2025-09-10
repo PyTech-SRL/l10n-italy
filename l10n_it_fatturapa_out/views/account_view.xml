@@ -90,6 +90,15 @@
                             colspan="2"
                         >
                             <field
+                                name="e_invoice_hide_line_type"
+                                string="Line Types to hide"
+                                attrs="{
+                                    'readonly': [
+                                        ('fatturapa_attachment_out_id', '!=', False),
+                                    ],
+                                }"
+                            />
+                            <field
                                 name="fatturapa_payment_method_id"
                                 attrs="{
                                     'readonly': [

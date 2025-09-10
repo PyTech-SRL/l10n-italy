@@ -4,6 +4,7 @@
 # Copyright 2018 Sergio Corato
 # Copyright 2019 Alex Comba - Agile Business Group
 # Copyright 2023 Simone Rubino - Aion Tech
+# Copyright 2025 Simone Rubino - PyTech
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl.html).
 
 import base64
@@ -114,6 +115,52 @@ class WizardExportFatturapa(models.TransientModel):
             return invoice.amount_total
         else:
             return abs(invoice.amount_total_signed)
+
+    def _get_line_types_from_hide_key(self, hide_key):
+        """Get which line types correspond to `hide_key`.
+
+        Line types are values of `account.move.line.display_type`.
+        Hide key is the value of `res.company.e_invoice_hide_line_type`.
+        """
+        line_types = []
+        if hide_key in ("note", "note_section"):
+            line_types.append("line_note")
+        if hide_key in ("note_section", "section"):
+            line_types.append("line_section")
+        return line_types
+
+    def _hide_invoice_lines(self, invoice):
+        """Exclude `invoice_lines` according to hide settings."""
+        invoice_lines = invoice.invoice_line_ids
+        hide_keys = [
+            invoice.e_invoice_hide_line_type,
+            invoice.partner_id.e_invoice_hide_line_type,
+            self.env.company.e_invoice_hide_line_type,
+        ]
+        for hide_key in hide_keys:
+            if hide_key:
+                to_hide_types = self._get_line_types_from_hide_key(hide_key)
+                invoice_lines = invoice_lines.filtered(
+                    lambda line, to_hide_types=to_hide_types: line.display_type
+                    not in to_hide_types
+                )
+                break
+        return invoice_lines
+
+    def _get_e_invoice_lines(self, invoice):
+        """
+        Allow to choose how and which invoice lines will be included in the e-invoice.
+        """
+        invoice_lines = self._hide_invoice_lines(invoice)
+        return invoice_lines.sorted(
+            key=lambda line: (
+                -line.sequence,
+                line.date,
+                line.move_name,
+                -line.id,
+            ),
+            reverse=True,
+        )
 
     @api.model
     def getAllTaxes(self, invoice):

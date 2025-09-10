@@ -1,7 +1,3 @@
-.. image:: https://odoo-community.org/readme-banner-image
-   :target: https://odoo-community.org/get-involved?utm_source=readme
-   :alt: Odoo Community Association
-
 =====================================
 ITA - Fattura elettronica - Emissione
 =====================================
@@ -17,7 +13,7 @@ ITA - Fattura elettronica - Emissione
 .. |badge1| image:: https://img.shields.io/badge/maturity-Beta-yellow.png
     :target: https://odoo-community.org/page/development-status
     :alt: Beta
-.. |badge2| image:: https://img.shields.io/badge/license-AGPL--3-blue.png
+.. |badge2| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fl10n--italy-lightgray.png?logo=github
@@ -73,6 +69,18 @@ Parametri > Parametri di sistema) con il codice voluto (tipicamente su
 richiesta del cliente). Non è possibile impostare un diverso CodiceTipo
 per cliente, al momento.
 
+Per non mostrare nella fattura elettronica le righe descrittive (note,
+sezioni) presenti nella fattura, valorizzare il campo "Tipi di righe da
+nascondere". Questo campo è presente in tre diversi posti, il valore
+impostato in uno di questi sovrascrive il valore presente nel
+successivo:
+
+1. Nella fattura, scheda "Fatturazione elettronica", sezione
+   "Configurazione";
+2. Nel partner, scheda "Fatturazione elettronica";
+3. In Contabilità > Configurazione > Impostazioni, sezione "Fatture
+   elettroniche".
+
 **English**
 
 See l10n_it_fatturapa README file.
@@ -83,6 +91,16 @@ from the default 'ODOO' by creating a parameter
 System Parameters) with the desired code (tipically on customer's
 request). It is not possible to set a different CodiceTipo by customer,
 until now.
+
+To hide the descriptive lines (notes, sections) present in the invoice
+from the electronic invoice, set the "Line Types to hide". This field is
+present in three different places; the value set in one place overrides
+the value in the following place:
+
+1. In the invoice, "Electronic Invoicing" tab, "Configuration" section;
+2. In the partner, "Electronic Invoicing" tab;
+3. In Accounting > Configuration > Settings, "Electronic Invoices"
+   section.
 
 Usage
 =====
