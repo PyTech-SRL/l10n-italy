@@ -1,5 +1,6 @@
 #  Copyright 2022 Simone Rubino - TAKOBI
 #  Copyright 2024 Simone Rubino - Aion Tech
+#  Copyright 2025 Simone Rubino - PyTech
 #  License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import logging
@@ -302,6 +303,15 @@ class WizardImportFatturapa(models.TransientModel):
 
             return partner_model.create(vals).id
 
+    def _will_update_partner(self, partner):
+        """True if `partner` will be updated
+        during the import of an electronic invoice."""
+        if partner:
+            update_partner = not partner.electronic_invoice_no_contact_update
+        else:
+            update_partner = False
+        return update_partner
+
     def get_partner_from_einvoice_node(self, partner_node):
         """
         Parameters
@@ -314,14 +324,10 @@ class WizardImportFatturapa(models.TransientModel):
         partner_id = self.with_context(
             fatturapa_in_skip_no_it_vat_check=True,
         ).getPartnerBase(partner_node.DatiAnagrafici)
-        no_contact_update = False
-        if partner_id:
-            no_contact_update = partner_model.browse(
-                partner_id
-            ).electronic_invoice_no_contact_update
+        partner = partner_model.browse(partner_id)
         fiscalPosModel = self.env["fatturapa.fiscal_position"]
-        if partner_id and not no_contact_update:
-            partner_company_id = partner_model.browse(partner_id).company_id.id
+        if self._will_update_partner(partner):
+            partner_company_id = partner.company_id.id
             vals = {
                 "street": " ".join(
                     map(
@@ -393,14 +399,14 @@ class WizardImportFatturapa(models.TransientModel):
                 rea_domain = [
                     ("rea_code", "=", rea_nr),
                     ("company_id", "=", partner_company_id),
-                    ("id", "!=", partner_id),
+                    ("id", "!=", partner.id),
                 ]
                 if office_id:
                     rea_domain.append(("rea_office", "=", office_id))
                 rea_partners = partner_model.search(rea_domain)
                 if rea_partners:
                     rea_names = ", ".join(rea_partners.mapped("name"))
-                    p_name = partner_model.browse(partner_id).name
+                    p_name = partner.name
                     self.log_inconsistency(
                         _(
                             "Current invoice is from {} with REA Code"
@@ -421,8 +427,8 @@ class WizardImportFatturapa(models.TransientModel):
                     vals["phone"] = partner_node.Contatti.Telefono
                 if partner_node.Contatti.Email:
                     vals["email"] = partner_node.Contatti.Email
-            partner_model.browse(partner_id).write(vals)
-        return partner_id
+            partner.write(vals)
+        return partner.id
 
     def getCedPrest(self, cedPrest):
         """Kept for retrocompatibility."""
@@ -437,17 +443,13 @@ class WizardImportFatturapa(models.TransientModel):
     def getCarrirerPartner(self, Carrier):
         partner_model = self.env["res.partner"]
         partner_id = self.getPartnerBase(Carrier.DatiAnagraficiVettore)
-        no_contact_update = False
-        if partner_id:
-            no_contact_update = partner_model.browse(
-                partner_id
-            ).electronic_invoice_no_contact_update
-        if partner_id and not no_contact_update:
+        partner = partner_model.browse(partner_id)
+        if self._will_update_partner(partner):
             vals = {
                 "license_number": Carrier.DatiAnagraficiVettore.NumeroLicenzaGuida
                 or "",
             }
-            partner_model.browse(partner_id).write(vals)
+            partner.write(vals)
         return partner_id
 
     def _prepare_generic_line_data(self, line):
