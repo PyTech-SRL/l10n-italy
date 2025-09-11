@@ -310,6 +310,23 @@ class WizardImportFatturapa(models.TransientModel):
             update_partner = not partner.electronic_invoice_no_contact_update
         else:
             update_partner = False
+
+        if update_partner:
+            # Updating a partner will trigger an update of the linked users
+            # This is the same condition checked in base's res.partner.write
+            if any(
+                u.has_group("base.group_user")
+                for u in partner.user_ids
+                if u != self.env.user
+            ):
+                raise UserError(
+                    _(
+                        "The partner %(partner)s is linked to a user that you cannot update.\n"
+                        "Contact an Administrator to import the electronic bill "
+                        "or to set 'Do not update the contact' in the partner.",
+                        partner=partner.display_name,
+                    )
+                )
         return update_partner
 
     def get_partner_from_einvoice_node(self, partner_node):
