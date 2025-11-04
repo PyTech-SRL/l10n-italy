@@ -56,10 +56,21 @@ class ReportFinancialStatementsReport(models.AbstractModel):
         sections should have, the report title, amounts and balances
         """
         rep_type = wizard_data.get("financial_statements_report_type")
+        trial_balance = self.env["trial.balance.report.wizard"].create(
+            {
+                "date_from": wizard_data["date_from"],
+                "date_to": wizard_data["date_to"],
+                "financial_statements_report_type": wizard_data[
+                    "financial_statements_report_type"
+                ],
+                "hide_accounts_codes": wizard_data["hide_accounts_codes"],
+            }
+        )
+        data = trial_balance._prepare_report_data()
 
         trial_balance_data = self.env[
             "report.account_financial_report.trial_balance"
-        ]._get_report_values([], wizard_data)
+        ]._get_report_values([], data)
 
         # Trial balance already has every data we may need
         section_credit_vals = []
