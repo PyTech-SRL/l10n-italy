@@ -1,7 +1,7 @@
 # Copyright 2025 Simone Rubino - PyTech
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from codicefiscale import isvalid as is_fiscalcode_valid
+from stdnum.it import codicefiscale, iva
 
 from odoo import models
 
@@ -15,7 +15,7 @@ class Employee(models.Model):
 
         # The Employee ID in an italian Company is the Fiscal Code
         if code:
-            is_valid = is_fiscalcode_valid(code)
+            is_valid = codicefiscale.is_valid(code) and not iva.is_valid(code)
         else:
             is_valid = True
         return is_valid

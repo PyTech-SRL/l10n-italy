@@ -1,7 +1,7 @@
 # Copyright 2025 Simone Rubino - PyTech
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from codicefiscale import isvalid as is_fiscalcode_valid
+from stdnum.it import codicefiscale
 
 from odoo import exceptions
 
@@ -29,7 +29,7 @@ class TestEmployee(Common):
         employee = self.employee_emp
         # pre-condition
         self.assertEqual(self.env.company.country_id, self.env.ref("base.it"))
-        self.assertFalse(is_fiscalcode_valid(bad_fiscal_code))
+        self.assertFalse(codicefiscale.is_valid(bad_fiscal_code))
 
         # Act
         with self.assertRaises(exceptions.ValidationError) as ve:

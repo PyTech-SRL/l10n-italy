@@ -12,7 +12,7 @@ class TestPayrollManagementWizard(Common):
         employee = self.employee_emp
         employee.identification_id = "RSSMRA84H04H501X"
         wizard = self._create_wizard(
-            "Ottobre", "l10n_it_hr_payroll_document/tests/data/cedolini.pdf".split("/")
+            "Ottobre", "l10n_it_hr_payroll_document/tests/data/cedolini.pdf"
         )
 
         # Act
@@ -25,9 +25,9 @@ class TestPayrollManagementWizard(Common):
         """If the employee is not found, payrolls are not sent."""
         # Arrange
         employee = self.employee_emp
-        employee.identification_id = "XSSMRA84H04H501X"
+        employee.identification_id = "RSSMRA70A41D969B"
         wizard = self._create_wizard(
-            "Ottobre", "l10n_it_hr_payroll_document/tests/data/cedolini.pdf".split("/")
+            "Ottobre", "l10n_it_hr_payroll_document/tests/data/cedolini.pdf"
         )
 
         # Act
