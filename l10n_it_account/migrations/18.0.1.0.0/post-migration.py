@@ -3,6 +3,8 @@ from psycopg2 import sql
 
 from odoo import SUPERUSER_ID, api
 
+from odoo.addons.l10n_it_account.migration_tools import _remove_module
+
 OLD_MODULES = [
     "l10n_it_account_tax_kind",
     "l10n_it_fatturapa",
@@ -95,6 +97,7 @@ def _l10n_it_account_tax_kind_migration(env):
     update_table(
         env, table, "account_tax_kind", {"l10n_it_exempt_reason": "code"}, condition
     )
+    _remove_module(env, "l10n_it_account_tax_kind")
 
 
 def _l10n_it_fatturapa_migration(env):
