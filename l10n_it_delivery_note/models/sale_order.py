@@ -104,6 +104,22 @@ class SaleOrder(models.Model):
         invoices = self.env["account.move"].browse(invoice_ids)
         invoices.update_delivery_note_lines()
 
+    def _get_invoiceable_lines(self, final=False):
+        order_lines = super()._get_invoiceable_lines(final=final)
+        new_order_lines = self.env["sale.order.line"].browse()
+        for order_line in order_lines:
+            invoiceable_dn_lines = order_line.delivery_note_line_ids.filtered(
+                lambda dn_line: dn_line.is_invoiceable
+            )
+            if len(invoiceable_dn_lines) > 1:
+                # Add a new order line for each linked delivery note line.
+                # Every new corresponding invoice line
+                # will invoice the delivered quantity
+                for _index in range(len(invoiceable_dn_lines) - 1):
+                    new_order_lines += order_line
+            new_order_lines += order_line
+        return new_order_lines
+
     def _create_invoices(self, grouped=False, final=False, date=None):
         invoice_ids = super()._create_invoices(grouped=grouped, final=final, date=date)
 
@@ -169,3 +185,28 @@ class SaleOrderLine(models.Model):
         return self.filtered(lambda li: li.has_picking).filtered(
             lambda li: li.is_pickings_related(picking_ids)
         )
+
+    def _prepare_invoice_line(self, **optional_values):
+        values = super()._prepare_invoice_line(**optional_values)
+        invoiced_dn_lines = self.env.context.get(
+            "delivery_note_invoiced_lines",
+            self.env["stock.delivery.note.line"].browse(),
+        )
+        invoiceable_dn_lines = (
+            self.delivery_note_line_ids.filtered(lambda dn_line: dn_line.is_invoiceable)
+            - invoiced_dn_lines
+        )
+
+        if invoiceable_dn_lines:
+            invoiced_dn_line = fields.first(invoiceable_dn_lines)
+            values.update(
+                {
+                    "delivery_note_line_id": invoiced_dn_line.id,
+                    "quantity": invoiced_dn_line.product_qty,
+                }
+            )
+            self.env.context = dict(
+                self.env.context,
+                delivery_note_invoiced_lines=invoiced_dn_lines | invoiced_dn_line,
+            )
+        return values

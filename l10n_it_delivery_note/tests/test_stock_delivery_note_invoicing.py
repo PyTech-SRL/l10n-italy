@@ -1355,19 +1355,40 @@ class StockDeliveryNoteInvoicingTest(StockDeliveryNoteCommon):
         invoice = sales_order.invoice_ids
         invoice.action_post()
         self.assertEqual(invoice.state, "posted")
-        self.assertEqual(
-            invoice.invoice_line_ids.filtered(
-                lambda inv_line: inv_line.product_id.id
-                == self.right_corner_desk_line[2]["product_id"]
-            ).quantity,
-            2,
-        )
-        self.assertEqual(
-            invoice.invoice_line_ids.filtered(
-                lambda inv_line: inv_line.product_id.id
-                == self.desk_combination_line[2]["product_id"]
-            ).quantity,
-            1,
+        self.assertRecordValues(
+            invoice.invoice_line_ids.sorted("sequence"),
+            [
+                {
+                    "note_dn": True,
+                    "delivery_note_id": dn.id,
+                    "product_id": False,
+                    "quantity": 0,
+                },
+                {
+                    "note_dn": False,
+                    "delivery_note_id": dn.id,
+                    "product_id": self.right_corner_desk_line[2]["product_id"],
+                    "quantity": 1,
+                },
+                {
+                    "note_dn": True,
+                    "delivery_note_id": back_dn.id,
+                    "product_id": False,
+                    "quantity": 0,
+                },
+                {
+                    "note_dn": False,
+                    "delivery_note_id": back_dn.id,
+                    "product_id": self.right_corner_desk_line[2]["product_id"],
+                    "quantity": 1,
+                },
+                {
+                    "note_dn": False,
+                    "delivery_note_id": back_dn.id,
+                    "product_id": self.desk_combination_line[2]["product_id"],
+                    "quantity": 1,
+                },
+            ],
         )
         self.assertEqual(dn.invoice_status, "invoiced")
         self.assertEqual(back_dn.invoice_status, "invoiced")
