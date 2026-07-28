@@ -16,7 +16,11 @@
     "version": "14.0.3.6.8",
     "category": "Localization/Italy",
     "license": "AGPL-3",
-    "maintainers": ["MarcoCalcagni", "aleuffre", "renda-dev"],
+    "maintainers": [
+        "MarcoCalcagni",
+        "HekkiMelody",
+        "renda-dev",
+    ],
     "depends": [
         "delivery_carrier_partner",
         "l10n_it_delivery_note_base",
