@@ -55,21 +55,9 @@ class SaleOrder(models.Model):
         self.update(values)
 
     def _assign_delivery_notes_invoices(self, invoice_ids):
-        order_lines_with_dn = self.mapped("order_line").filtered(
-            "delivery_note_line_ids"
+        order_lines = self.mapped("order_line").filtered(
+            lambda li: li.is_invoiced and li.delivery_note_line_ids
         )
-
-        order_lines = self.env["sale.order.line"].browse()
-        for order_line in order_lines_with_dn:
-            for invoice_line in order_line.invoice_lines:
-                if (
-                    invoice_line.move_id.id in invoice_ids
-                    and invoice_line.product_uom_id._compute_quantity(
-                        invoice_line.quantity, order_line.product_uom
-                    )
-                ):
-                    order_lines |= order_line
-                    break
 
         delivery_note_lines = order_lines.mapped("delivery_note_line_ids").filtered(
             lambda li: li.is_invoiceable
@@ -96,6 +84,11 @@ class SaleOrder(models.Model):
         #       Personalmente, non lo gestirei e delegherei
         #        all'operatore questa responsabilità...
         #
+
+        draft_delivery_note_lines.write(
+            {"invoice_status": DOMAIN_INVOICE_STATUSES[0], "sale_line_id": None}
+        )
+
         ready_delivery_note_lines.write({"invoice_status": DOMAIN_INVOICE_STATUSES[2]})
         for ready_delivery_note in ready_delivery_notes:
             ready_invoice_ids = [
@@ -103,15 +96,9 @@ class SaleOrder(models.Model):
                 for invoice_id in ready_delivery_note.sale_ids.mapped("invoice_ids").ids
                 if invoice_id in invoice_ids
             ]
-            ready_invoices = self.env["account.move"].browse(ready_invoice_ids)
-
-            # Link each DN line to its corresponding invoice line.
-            # They correspond when they are linked to the same sale line.
-            for ready_dn_line in ready_delivery_note.line_ids:
-                for ready_inv_line in ready_invoices.invoice_line_ids:
-                    if ready_dn_line.sale_line_id in ready_inv_line.sale_line_ids:
-                        ready_inv_line.delivery_note_line_id = ready_dn_line
-                        break
+            ready_delivery_note.write(
+                {"invoice_ids": [(4, invoice_id) for invoice_id in ready_invoice_ids]}
+            )
 
         ready_delivery_notes._compute_invoice_status()
 
