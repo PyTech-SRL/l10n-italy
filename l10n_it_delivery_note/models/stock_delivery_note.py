@@ -104,6 +104,8 @@ class StockDeliveryNote(models.Model):
         string="State",
         copy=False,
         default=DOMAIN_DELIVERY_NOTE_STATES[0],
+        compute="_compute_state",
+        store=True,
         required=True,
         tracking=True,
     )
@@ -344,13 +346,21 @@ class StockDeliveryNote(models.Model):
                 if all(
                     line.invoice_status == DOMAIN_INVOICE_STATUSES[2] for line in lines
                 ):
-                    note.state = DOMAIN_DELIVERY_NOTE_STATES[2]
                     invoice_status = DOMAIN_INVOICE_STATUSES[2]
                 elif any(
                     line.invoice_status == DOMAIN_INVOICE_STATUSES[1] for line in lines
                 ):
                     invoice_status = DOMAIN_INVOICE_STATUSES[1]
             note.invoice_status = invoice_status
+
+    @api.depends("invoice_status")
+    def _compute_state(self):
+        for note in self:
+            if note.invoice_status == DOMAIN_INVOICE_STATUSES[2]:
+                state = DOMAIN_DELIVERY_NOTE_STATES[2]
+            else:
+                state = note.state
+            note.state = state
 
     @api.depends("line_ids.currency_id")
     def _compute_currency_id(self):
