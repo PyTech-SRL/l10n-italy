@@ -591,7 +591,6 @@ class StockDeliveryNote(models.Model):
 
     def action_draft(self):
         self.write({"state": DOMAIN_DELIVERY_NOTE_STATES[0]})
-        self.line_ids.sync_invoice_status()
 
     def _action_confirm(self):
         for note in self:
@@ -1167,12 +1166,3 @@ class StockDeliveryNoteLine(models.Model):
             )
 
         return super().write(vals)
-
-    def sync_invoice_status(self):
-        for line in self.filtered(lambda li: li.sale_line_id):
-            invoice_status = line.sale_line_id.invoice_status
-            line.invoice_status = (
-                DOMAIN_INVOICE_STATUSES[1]
-                if invoice_status == "upselling"
-                else invoice_status
-            )

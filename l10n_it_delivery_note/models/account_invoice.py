@@ -161,7 +161,6 @@ class AccountInvoice(models.Model):
         inv_dnls = self.mapped("delivery_note_ids").mapped("line_ids")
         dnls_to_unlink = all_dnls & inv_dnls
         res = super().unlink()
-        dnls_to_unlink.sync_invoice_status()
         dnls_to_unlink.mapped("delivery_note_id")._compute_invoice_status()
         for dn in dnls_to_unlink.mapped("delivery_note_id"):
             dn.state = "confirm"
@@ -173,7 +172,6 @@ class AccountInvoice(models.Model):
             self.invoice_line_ids.sale_line_ids.delivery_note_line_ids
             | self.delivery_note_ids.line_ids
         )
-        dn_lines.sync_invoice_status()
         dn_lines.delivery_note_id._compute_invoice_status()
         dn_lines.delivery_note_id.state = "confirm"
 
