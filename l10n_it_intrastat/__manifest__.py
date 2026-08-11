@@ -27,6 +27,7 @@
         "data/account.intrastat.transport.csv",
         "data/account.intrastat.custom.csv",
         "data/report.intrastat.code.csv",
+        "reports/report_invoice.xml",
         "views/intrastat.xml",
         "views/product.xml",
         "views/account.xml",

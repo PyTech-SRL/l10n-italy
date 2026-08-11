@@ -1,3 +1,7 @@
+.. image:: https://odoo-community.org/readme-banner-image
+   :target: https://odoo-community.org/get-involved?utm_source=readme
+   :alt: Odoo Community Association
+
 ===============
 ITA - Intrastat
 ===============
@@ -13,7 +17,7 @@ ITA - Intrastat
 .. |badge1| image:: https://img.shields.io/badge/maturity-Beta-yellow.png
     :target: https://odoo-community.org/page/development-status
     :alt: Beta
-.. |badge2| image:: https://img.shields.io/badge/licence-AGPL--3-blue.png
+.. |badge2| image:: https://img.shields.io/badge/license-AGPL--3-blue.png
     :target: http://www.gnu.org/licenses/agpl-3.0-standalone.html
     :alt: License: AGPL-3
 .. |badge3| image:: https://img.shields.io/badge/github-OCA%2Fl10n--italy-lightgray.png?logo=github
@@ -68,6 +72,7 @@ impostare i parametri delle seguenti sezioni presenti nella scheda "Informazioni
    g) *Nome file da esportare*: nome del file che può essere impostato per forzare quello predefinito (SCAMBI.CEE).
    h) *Sezione doganale*: sezione doganale predefinita da proporre in una nuova dichiarazione.
    i) *Ammontare minimo*: in caso di fatture di importo inferiore usa questo valore nella dichiarazione.
+   j) *Mostrare codice Intrastat in fattura*: se abilitato, il codice intrastat di ogni prodotto viene mostrato nella fattura/ricevuta/nota di credito di vendita.
 
 2. Valori predefiniti per cessioni (parametri Intrastat per le fatture di vendita)
 
@@ -198,6 +203,9 @@ Contributors
 * Fabio Giovannelli <fabio.giovannelli@didotech.com>
 * Alex Comba <alex.comba@agilebg.com>
 * Sergio Corato <https://github.com/sergiocorato>
+* `PyTech <https://www.pytech.it>`_:
+
+  * Simone Rubino <simone.rubino@pytech.it>
 
 Maintainers
 ~~~~~~~~~~~
