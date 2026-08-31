@@ -5,6 +5,10 @@ from odoo.exceptions import UserError
 from odoo.tests import new_test_user
 from odoo.tests.common import Form
 
+from odoo.addons.l10n_it_delivery_note.mixins.delivery_mixin import (
+    _domain_delivery_carrier_partner,
+)
+
 from .delivery_note_common import StockDeliveryNoteCommon
 
 
@@ -130,7 +134,19 @@ class StockDeliveryNote(StockDeliveryNoteCommon):
         carrier_partner_id = self.env["res.partner"].name_create(
             "Test carrier partner"
         )[0]
+        carrier_domain = _domain_delivery_carrier_partner(
+            self.env["stock.delivery.note"]
+        )
+        self.assertNotIn(
+            carrier_partner_id, self.env["res.partner"].search(carrier_domain).ids
+        )
         delivery_note_id.delivery_method_id.partner_id = carrier_partner_id
+        carrier_domain = _domain_delivery_carrier_partner(
+            self.env["stock.delivery.note"]
+        )
+        self.assertIn(
+            carrier_partner_id, self.env["res.partner"].search(carrier_domain).ids
+        )
         product_product_delivery_normal = self.env["product.product"].create(
             {
                 "name": "Normal Delivery Charges",
