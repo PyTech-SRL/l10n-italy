@@ -140,6 +140,8 @@ class StockDeliveryNote(models.Model):
     carrier_id = fields.Many2one(
         "res.partner",
         string="Carrier",
+        compute="_compute_carrier_id",
+        store=True,
         states=DONE_READONLY_STATE,
         tracking=True,
     )
@@ -436,9 +438,18 @@ class StockDeliveryNote(models.Model):
     def _onchange_picking_ids(self):
         self._compute_weights()
 
-    @api.onchange("delivery_method_id")
-    def _onchange_delivery_method_id(self):
-        self.carrier_id = self.delivery_method_id.partner_id
+    @api.depends(
+        "delivery_method_id",
+        "picking_ids",
+    )
+    def _compute_carrier_id(self):
+        for note in self:
+            carrier = note.delivery_method_id or fields.first(
+                note.picking_ids.carrier_id
+            )
+            carrier_partner = carrier.partner_id
+            if carrier_partner:
+                note.carrier_id = carrier_partner
 
     def _inverse_set_pickings(self):
         for note in self:
