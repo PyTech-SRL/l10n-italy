@@ -111,8 +111,8 @@
                 </div>
 
                 <h2 id="document_title">
-                    <span t-if="doc.state in ['draft']">Draft document:</span>
-                    <span t-if="doc.state not in ['draft']">Document:</span>
+                    <span t-if="doc.state in ['draft']">Draft Delivery Slip:</span>
+                    <span t-if="doc.state not in ['draft']">Delivery Slip:</span>
                     <small>
                         <span t-field="doc.display_name" />
                     </small>
