@@ -147,6 +147,10 @@
                         <group>
                             <field name="type_id" widget="selection" />
                             <field name="date" />
+                            <field
+                                name="incoterm_id"
+                                groups="sale_stock.group_display_incoterm"
+                            />
                         </group>
                     </group>
                     <group>

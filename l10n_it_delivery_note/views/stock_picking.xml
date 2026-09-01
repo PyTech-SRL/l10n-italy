@@ -225,6 +225,11 @@
                                                        'readonly': [('delivery_note_draft', '=', False)]}"
                                         />
                                         <field
+                                            name="delivery_note_incoterm_id"
+                                            groups="sale_stock.group_display_incoterm"
+                                            attrs="{'readonly': [('delivery_note_draft', '=', False)]}"
+                                        />
+                                        <field
                                             name="delivery_note_date"
                                             attrs="{'readonly': [('delivery_note_draft', '=', False)]}"
                                         />
