@@ -134,6 +134,13 @@
                             <th class="text-start">
                                 Description
                             </th>
+                            <th
+                                t-if="doc.print_packages"
+                                class="text-start"
+                                groups="stock.group_tracking_lot"
+                            >
+                                Packages
+                            </th>
                             <th class="text-start">
                                 Quantity
                             </th>
@@ -186,6 +193,37 @@
                                                 t-esc=" '%s: %s' % (attrib_value.attribute_id.name,attrib_value.name)"
                                             />
                                         </t>
+                                    </td>
+                                    <td
+                                        t-if="doc.print_packages"
+                                        class="text-start"
+                                        groups="stock.group_tracking_lot"
+                                    >
+                                        <t
+                                            t-set="line_packages"
+                                            t-value="line.move_id.move_line_ids.result_package_id"
+                                        />
+                                        <ul t-if="line_packages">
+                                            <t
+                                                t-foreach="line_packages"
+                                                t-as="line_package"
+                                            >
+                                                <t
+                                                    t-set="package_move_lines"
+                                                    t-value="line.move_id.move_line_ids.filtered(
+                                                        lambda line: line.result_package_id == line_package
+                                                    )"
+                                                />
+                                                <li t-if="package_move_lines">
+                                                    <span
+                                                        t-field="line_package.name"
+                                                    />:
+                                                    <span
+                                                        t-esc="sum(package_move_lines.mapped('qty_done'))"
+                                                    />
+                                                </li>
+                                            </t>
+                                        </ul>
                                     </td>
                                     <td class="text-start">
                                         <span t-field="line.product_qty" />
