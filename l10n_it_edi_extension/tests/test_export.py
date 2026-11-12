@@ -1,6 +1,8 @@
 # Copyright 2025 Simone Rubino
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
+from lxml import etree
+
 from odoo import Command, tests, tools
 
 from .common import Common
@@ -168,6 +170,37 @@ class TestExport(Common):
         )
         invoice.action_post()
         self._assert_export_invoice(invoice, "us_partner_shipping.xml")
+
+    def test_show_descriptive_lines_mandatory_natura(self):
+        """When an invoice has exempt tax and descriptive lines are exported,
+        the exported line has the mandatory Natura node.
+        """
+        # Arrange
+        invoice = self.init_invoice(
+            "out_invoice",
+            partner=self.italian_partner_b,
+            amounts=[
+                100,
+            ],
+            taxes=self.n32_sale_tax,
+            company=self.company,
+        )
+        note_name = "Test note"
+        with tests.Form(invoice) as invoice_form:
+            invoice_form.l10n_it_edi_hide_line_type = "none"
+            with invoice_form.invoice_line_ids.new() as note_line:
+                note_line.name = "Test note"
+                note_line.display_type = "line_note"
+
+        # Act
+        invoice.action_post()
+
+        # Assert
+        e_invoice_xml = etree.fromstring(invoice._l10n_it_edi_render_xml())
+        note_line_node = e_invoice_xml.xpath(
+            f"//DettaglioLinee[Descrizione[text()='{note_name}']]"
+        )[0]
+        self.assertTrue(note_line_node.find("Natura"))
 
     def test_hide_descriptive_lines_simplified(self):
         """Check that descriptive lines are hidden in the simplified e-invoice

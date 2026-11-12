@@ -434,7 +434,9 @@ class AccountMoveInherit(models.Model):
                 break
         return invoice_lines
 
-    def _l10n_it_edi_get_descriptive_base_line(self, invoice_line, tax_amount=None):
+    def _l10n_it_edi_get_descriptive_base_line(
+        self, invoice_line, exempt_reason=None, tax_amount=None
+    ):
         """Get the XML values for `invoice_line`, when it is a note/section."""
         base_line = self._prepare_product_base_line_for_taxes_computation(invoice_line)
         tax_model = self.env["account.tax"]
@@ -451,23 +453,36 @@ class AccountMoveInherit(models.Model):
             tax = fields.first(invoice_line.tax_ids)
             tax_amount = tax.amount if tax.amount_type == "percent" else tax_amount
             tax_amount_list.append(tax_amount or 0.0)
+        if not base_line["it_values"]["natura"] and exempt_reason:
+            base_line["it_values"]["natura"] = exempt_reason
         return base_line
 
     def _l10n_it_edi_hide_base_lines(self, base_lines):
         """Exclude `base_lines` according to hide settings."""
         invoice_lines = self._l10n_it_edi_hide_invoice_lines()
 
+        # AliquotaIva is mandatory in the e-invoice lines,
+        # Natura is also mandatory in some cases.
+        # Here we gather a value for each mandatory field
+        # to be set in descriptive lines.
+        descriptive_exempt_reason = descriptive_tax_amount = None
+        for base_line in base_lines:
+            if descriptive_exempt_reason and descriptive_tax_amount:
+                break
+            else:
+                it_values = base_line["it_values"]
+                if not descriptive_tax_amount and (
+                    iva_list := it_values["aliquota_iva_list"]
+                ):
+                    descriptive_tax_amount = iva_list[0]
+                if not descriptive_exempt_reason and (
+                    exempt_reason := it_values["natura"]
+                ):
+                    descriptive_exempt_reason = exempt_reason
+
         # Insert the descriptive lines where needed
         new_base_lines = []
         added_lines_number = 0
-        descriptive_tax_amounts = [
-            tax_amount
-            for base_line in base_lines
-            for tax_amount in base_line["it_values"]["aliquota_iva_list"]
-        ]
-        descriptive_tax_amount = (
-            descriptive_tax_amounts[0] if descriptive_tax_amounts else None
-        )
         for invoice_line in invoice_lines:
             invoice_line_id = invoice_line.id
             for base_line in base_lines:
@@ -488,6 +503,7 @@ class AccountMoveInherit(models.Model):
                     # Create the data for missing descriptive line
                     new_base_line = self._l10n_it_edi_get_descriptive_base_line(
                         invoice_line,
+                        exempt_reason=descriptive_exempt_reason,
                         tax_amount=descriptive_tax_amount,
                     )
                     new_base_line["it_values"]["numero_linea"] = (
